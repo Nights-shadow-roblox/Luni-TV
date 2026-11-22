@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0d0f14">
+<title>Luni TV Remote</title>
+<style>
+:root{--bg:#0d0f14;--surf:#1b1e27;--surf2:#2a2f3d;--text:#f2f4f9;--mute:#9aa2b8;--acc:#a8c7fa;--on:#0b1b3a}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html{background:var(--bg)}
+body{min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;user-select:none;-webkit-user-select:none;
+  max-width:460px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 20px);display:flex;flex-direction:column;gap:16px}
+header{display:flex;align-items:center;font-weight:700;font-size:18px}
+header small{margin-left:auto;color:var(--mute);font-weight:500;font-size:13px;display:flex;align-items:center;gap:6px}
+#dot{width:9px;height:9px;border-radius:50%;background:#ea4a4f}#dot.ok{background:#58e07a}
+button{font:inherit;color:var(--text);border:0;background:var(--surf2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1.1}
+button.on:not(.mute){background:#3a4260}
+button.on:not(.mute) .i{color:#ffc83d}
+button:active,button.dn{background:var(--acc);color:var(--on);transform:scale(.96)}
+button .i{font-size:22px}
+button .l{font-size:12px;font-weight:600;color:var(--mute)}
+button:active .l,button.dn .l{color:var(--on)}
+.now{background:var(--surf);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.now .r1{display:flex;align-items:baseline;gap:10px}
+.now .num{font-size:26px;font-weight:800;color:var(--acc);min-width:1.4em}
+.now .nm{font-size:17px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.now .r2{font-size:13px;color:var(--mute);display:flex;justify-content:space-between;gap:8px}
+.now .bar{height:5px;border-radius:3px;background:var(--surf2);overflow:hidden}
+.now .bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
+.now.mt .bar i{background:var(--mute)}
+.top{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.top button{height:64px;border-radius:16px}
+.rock{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:center}
+.rk{display:flex;flex-direction:column;background:var(--surf);border-radius:36px;overflow:hidden;height:176px}
+.rk button{flex:1;background:transparent;border-radius:0;font-size:28px;font-weight:300}
+.rk button:active,.rk button.dn{background:var(--acc)}
+.rk .t{text-align:center;font-size:12px;font-weight:700;color:var(--mute);letter-spacing:.08em;padding:2px 0}
+.mute{height:64px;border-radius:32px;align-self:center}
+.mute.on{background:#ea4a4f;color:#fff}.mute.on .l{color:#fff}
+.ring{position:relative;width:min(78vw,300px);aspect-ratio:1;margin:0 auto;border-radius:50%;background:var(--surf);display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr}
+.ring button{background:transparent;border-radius:12px;font-size:30px}
+.ring button .l{font-size:11px}
+.ring .u{grid-area:1/2}.ring .lf{grid-area:2/1}.ring .rt{grid-area:2/3}.ring .dw{grid-area:3/2}
+.ring .ok{grid-area:2/2;background:var(--surf2);border-radius:50%;font-size:18px;font-weight:800;margin:-4px}
+.ring button:active,.ring button.dn{background:var(--acc)}
+.nav{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.nav button{height:60px;border-radius:30px;flex-direction:row;gap:8px}
+.nav .i{font-size:20px}.nav .l{font-size:14px;color:var(--text)}
+.nav button:active .l,.nav button.dn .l{color:var(--on)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pad button{height:56px;border-radius:16px;font-size:22px;font-weight:600}
+.pad button .l{font-size:11px}
+.cap{font-size:12px;color:var(--mute);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:-6px 0 -8px 4px}
+.txt{display:flex;gap:10px}
+.txt input{flex:1;height:54px;border-radius:27px;border:1px solid var(--surf2);background:var(--surf);color:var(--text);font:inherit;font-size:17px;padding:0 20px;outline:none;user-select:text;-webkit-user-select:text}
+.txt input:focus{border-color:var(--acc)}
+.txt button{width:84px;height:54px;border-radius:27px;background:var(--acc);color:var(--on);font-weight:700;font-size:16px}
+#msg{text-align:center;color:var(--mute);font-size:13px;min-height:18px}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="luni-link.js"></script>
+</head>
+<body>
+<header><a href="index.html" aria-label="Main menu" style="color:var(--mute);text-decoration:none;font-size:30px;line-height:1;margin:-4px 12px 0 0">&#8249;</a>Luni TV Remote<small><span id="dot"></span><span id="st">Connecting</span></small></header>
+
+<div class="txt" id="pair" style="display:none"><input id="pc" type="text" placeholder="Connect code" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="12"><button id="pb">Connect</button></div>
+
+<div class="now" id="now"><div class="r1"><span class="num" id="nn">--</span><span class="nm" id="nname">Waiting for TV</span></div>
+  <div class="r2"><span id="ngrp">&nbsp;</span><span id="nst"></span></div><div class="bar"><i id="nvol"></i></div></div>
+
+<div class="top">
+  <button data-a="find"><span class="i">&#128269;</span><span class="l">Search</span></button>
+  <button data-a="home"><span class="i">&#8962;</span><span class="l">Home</span></button>
+  <button data-a="info"><span class="i">&#9432;</span><span class="l">Info</span></button>
+  <button data-b="Y"><span class="i">&#9881;</span><span class="l">Settings</span></button>
+</div>
+<div class="top">
+  <button data-a="fav" id="bfav"><span class="i">&#9733;</span><span class="l" id="lfav">Favorite</span></button>
+  <button data-a="sleep" id="bsleep"><span class="i">&#9790;</span><span class="l" id="lsleep">Sleep</span></button>
+  <button data-a="pic"><span class="i">&#9635;</span><span class="l" id="lpic">Picture</span></button>
+  <button data-a="help"><span class="i">&#63;</span><span class="l">Controls</span></button>
+</div>
+
+<div class="rock">
+  <div class="rk"><button data-a="vu" data-rep>+</button><div class="t">VOL</div><button data-a="vd" data-rep>&minus;</button></div>
+  <button class="mute" id="mute" data-a="mute"><span class="i">&#128263;</span><span class="l">Mute</span></button>
+  <div class="rk"><button data-a="next">+</button><div class="t">CH</div><button data-a="prev">&minus;</button></div>
+</div>
+
+<div class="ring">
+  <button class="u" data-b="UP" data-rep>&#9650;</button>
+  <button class="lf" data-b="LEFT" data-rep>&#9664;</button>
+  <button class="ok" data-b="A">OK</button>
+  <button class="rt" data-b="RIGHT" data-rep>&#9654;</button>
+  <button class="dw" data-b="DOWN" data-rep>&#9660;</button>
+</div>
+
+<div class="nav">
+  <button data-a="back"><span class="i">&#8617;</span><span class="l">Back</span></button>
+  <button data-a="pp"><span class="i">&#9199;</span><span class="l">Play/Pause</span></button>
+  <button data-a="last"><span class="i">&#8634;</span><span class="l">Last</span></button>
+</div>
+
+<div class="cap">Channel number</div>
+<div class="pad">
+  <button data-d="1">1</button><button data-d="2">2</button><button data-d="3">3</button>
+  <button data-d="4">4</button><button data-d="5">5</button><button data-d="6">6</button>
+  <button data-d="7">7</button><button data-d="8">8</button><button data-d="9">9</button>
+  <button data-b="LB"><span>&minus;5</span><span class="l">channels</span></button>
+  <button data-d="0">0</button>
+  <button data-b="RB"><span>+5</span><span class="l">channels</span></button>
+</div>
+
+<div class="txt"><input id="t" type="text" placeholder="Type to search channels" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button id="go">Open</button></div>
+<div id="msg">Hold VOL or the arrows to repeat. Typing fills the TV search; Open picks the top result.</div>
+
+<script>LuniLink.client();
+let K=(new URLSearchParams(location.search).get('k')||'').trim().toLowerCase();
+try{if(!K)K=localStorage.getItem('luniK')||''}catch(e){}
+const pair=document.getElementById('pair');
+const dot=document.getElementById('dot'), st=document.getElementById('st'), msg=document.getElementById('msg');
+function status(ok,text){dot.classList.toggle('ok',ok);st.textContent=text||(ok?'Connected':'Offline')}
+async function send(o){
+  try{
+    const r=await fetch('/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({k:K},o)),keepalive:true});
+    if(r.status===403){status(false,'Enter code');pair.style.display='flex';msg.textContent='Enter the connect code from the Luni TV main menu, and make sure Luni TV is open on the TV.';return false}
+    if(r.ok){pair.style.display='none';try{localStorage.setItem('luniK',K)}catch(e){}}
+    status(r.ok);return r.ok;
+  }catch(e){status(false);return false}
+}
+const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
+let hold=null,rep=null,muted=false;
+function stop(){clearTimeout(hold);clearInterval(rep);document.querySelectorAll('button.dn').forEach(b=>b.classList.remove('dn'))}
+document.querySelectorAll('button[data-a],button[data-b],button[data-d]').forEach(b=>{
+  const d=b.dataset, key=d.a?'a':d.b?'b':'d', val=d[key], rp=b.hasAttribute('data-rep');
+  b.addEventListener('pointerdown',e=>{
+    e.preventDefault(); b.classList.add('dn'); buzz(12);
+    send({[key]:val});
+    if(val==='mute'){muted=!muted;b.classList.toggle('on',muted)}
+    if(rp)hold=setTimeout(()=>{rep=setInterval(()=>send({[key]:val,rep:true}),110)},380);
+  });
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop));
+});
+document.addEventListener('contextmenu',e=>e.preventDefault());
+const t=document.getElementById('t');
+t.addEventListener('input',()=>send({t:t.value}));
+t.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send({b:'A'});t.blur()}});
+document.getElementById('go').addEventListener('click',()=>{send({b:'A'});t.blur()});
+document.getElementById('pb').addEventListener('click',()=>{K=document.getElementById('pc').value.trim().toLowerCase();send({n:'hello'}).then(ok=>{if(ok){status(true);msg.textContent='Connected.'}})});
+send({n:'hello'}).then(ok=>{if(ok)status(true)});
+setInterval(()=>send({n:'ping'}),8000);
+const $=i=>document.getElementById(i), MODES={tv:'Watching',home:'Home',settings:'Settings',find:'Search',help:'Controls'};
+async function poll(){
+  try{
+    const r=await fetch('/state?k='+encodeURIComponent(K),{cache:'no-store'}); if(!r.ok)return;
+    const s=await r.json();
+    if(!s.online){$('nname').textContent='TV is not responding';$('nn').textContent='--';$('ngrp').innerHTML='&nbsp;';$('nst').textContent='';return}
+    const playing=s.n>0;
+    $('nn').textContent=playing?s.n:'--';
+    $('nname').textContent=playing?s.name:(s.mode==='home'?'Home screen':'Luni TV');
+    $('ngrp').textContent=playing?(s.group+'  \u00b7  '+s.n+' of '+s.total):(s.total?s.total+' channels ready':'');
+    $('nst').textContent=(MODES[s.mode]||'')+(playing&&s.mode==='tv'?(s.paused?'  \u00b7  Paused':''):'');
+    $('nvol').style.width=(s.muted?0:s.vol)+'%'; $('now').classList.toggle('mt',!!s.muted);
+    muted=!!s.muted; $('mute').classList.toggle('on',muted);
+    $('bfav').classList.toggle('on',!!s.fav); $('lfav').textContent=s.fav?'Favorited':'Favorite';
+    $('bsleep').classList.toggle('on',s.sleep>0); $('lsleep').textContent=s.sleep>0?s.sleep+' min':'Sleep';
+    $('lpic').textContent=({contain:'Fit',cover:'Fill',fill:'Stretch'})[s.pic]||'Picture';
+  }catch(e){}
+}
+setInterval(poll,1500); poll();
+</script>
+</body>
+</html>

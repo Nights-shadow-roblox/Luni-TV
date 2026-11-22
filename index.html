@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d0f14">
+<title>Luni TV</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--surf:#1b1e27;--surf2:#262a36;--line:rgba(255,255,255,.1);--text:#f2f4f9;--mute:#9aa2b8;--acc:#a8c7fa;--on:#0b1b3a;--font:'Figtree','Segoe UI',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+html{background:var(--bg);color-scheme:dark}
+body{min-height:100vh;font-family:var(--font);color:var(--text);
+  background:radial-gradient(ellipse at 20% 0,#27345e 0,transparent 55%),radial-gradient(ellipse at 90% 100%,#3b2457 0,transparent 55%),var(--bg);
+  padding:calc(env(safe-area-inset-top) + 28px) 20px calc(env(safe-area-inset-bottom) + 28px)}
+.wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand h1{font-size:34px;font-weight:800;letter-spacing:-.02em}
+.mdl{font-size:13px;font-weight:600;color:var(--mute);padding:4px 12px;border:1px solid var(--line);border-radius:14px}
+.dots{display:flex;gap:5px}.dots i{width:10px;height:10px;border-radius:50%}
+.dots i:nth-child(1){background:#4285f4}.dots i:nth-child(2){background:#ea4335}.dots i:nth-child(3){background:#fbbc04}.dots i:nth-child(4){background:#34a853}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+a.card,.panel{background:rgba(27,30,39,.85);border:1px solid var(--line);border-radius:28px;padding:26px;backdrop-filter:blur(14px)}
+a.card{display:flex;flex-direction:column;gap:10px;color:inherit;text-decoration:none;min-height:190px;justify-content:flex-end;transition:transform .15s,background .15s,border-color .15s}
+a.card:hover,a.card:focus-visible{background:var(--surf2);border-color:var(--acc);transform:translateY(-3px);outline:0}
+a.card .ic{font-size:40px;line-height:1}
+a.card b{font-size:26px;font-weight:800}
+a.card span{color:var(--mute);line-height:1.45}
+.panel h2{font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.panel p{color:var(--mute);line-height:1.5;margin-top:8px}
+.panels{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+#code{font-size:clamp(34px,8vw,52px);font-weight:800;letter-spacing:.14em;color:var(--acc);margin:12px 0 4px;font-variant-numeric:tabular-nums;word-break:break-all}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+button,.btn{font:inherit;font-weight:700;border:0;border-radius:22px;padding:12px 20px;background:var(--surf2);color:var(--text);cursor:pointer;text-decoration:none}
+button:hover,.btn:hover{background:#343a4c}
+button.pri{background:var(--acc);color:var(--on)}button.pri:hover{background:#c6dbff}
+input{font:inherit;font-size:20px;letter-spacing:.12em;height:52px;border-radius:26px;border:1px solid var(--surf2);background:var(--bg);color:var(--text);padding:0 20px;outline:0;flex:1;min-width:0}
+input:focus{border-color:var(--acc)}
+#err{color:#ff8a8f;min-height:20px;margin-top:8px;font-size:14px}
+.hint{font-size:13px;color:var(--mute);margin-top:10px}
+@media (max-width:720px),(pointer:coarse){
+  .cards,.panels{grid-template-columns:1fr}
+  #ctl{order:-1}
+  a.card{min-height:130px}
+  #pairp{order:-1}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><h1>Luni TV</h1><span class="mdl">Model: 25-A</span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+
+  <div class="cards">
+    <a class="card" id="watch" href="tv.html"><span class="ic">&#128250;</span><b>Watch Luni TV</b><span>Open the TV full screen on this device. It shows the connect code in Settings.</span></a>
+    <a class="card" id="ctl" href="remote.html"><span class="ic">&#128241;</span><b>Mobile controller</b><span>Use your phone as the remote for a Luni TV that is open on another screen.</span></a>
+  </div>
+
+  <div class="panels">
+    <div class="panel" id="pairp">
+      <h2>Connect to a TV</h2>
+      <p>Enter the connect code shown in the main menu of the screen that is playing Luni TV.</p>
+      <div class="row"><input id="enter" placeholder="Connect code" maxlength="12" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go"><button class="pri" id="go">Open controller</button></div>
+      <div id="err"></div>
+    </div>
+    <div class="panel">
+      <h2>Connect code</h2>
+      <div id="code">--------</div>
+      <p>This code connects a phone to the Luni TV that runs on <b>this</b> device.</p>
+      <div class="row"><button id="copy">Copy link</button><button id="renew">New code</button></div>
+      <div class="hint" id="note">Keep Luni TV open on this device so the controller can find it.</div>
+    </div>
+  </div>
+</div>
+
+<script src="luni-link.js"></script>
+<script>
+const $=i=>document.getElementById(i);
+const show=()=>{$('code').textContent=LuniLink.code().toUpperCase()};
+show(); LuniLink.onChange(show);
+const coarse=matchMedia('(pointer:coarse)').matches||innerWidth<=720;
+if(coarse&&LuniLink.valid(new URLSearchParams(location.search).get('k')))
+  location.replace('remote.html?k='+encodeURIComponent(new URLSearchParams(location.search).get('k')));
+try{const last=localStorage.getItem('luniK');if(last&&LuniLink.valid(last))$('enter').value=last.toUpperCase()}catch(e){}
+function go(){
+  const c=$('enter').value.trim().toLowerCase();
+  if(!LuniLink.valid(c)){$('err').textContent='The connect code has 8 letters and numbers.';return}
+  location.href='remote.html?k='+encodeURIComponent(c);
+}
+$('go').onclick=go;
+$('enter').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
+$('enter').addEventListener('input',()=>$('err').textContent='');
+$('copy').onclick=async()=>{
+  const link=new URL('remote.html?k='+LuniLink.code(),location.href).href;
+  try{await navigator.clipboard.writeText(link);$('note').textContent='Link copied. Open it on your phone to control this TV.'}
+  catch(e){$('note').textContent=link}
+};
+$('renew').onclick=()=>{LuniLink.newCode();$('note').textContent='New code created. Phones need the new code. Reopen Luni TV on this device to use it.'};
+if(!coarse)$('watch').focus();
+</script>
+</body>
+</html>
