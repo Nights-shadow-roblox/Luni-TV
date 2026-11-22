@@ -167,7 +167,7 @@ mark{background:none;color:var(--acc);font-weight:800}
 <body>
 <div id="tv">
   <video id="v" playsinline autoplay></video>
-  <div id="card"><div class="plate"><h1>Luni TV</h1><p class="model">Model: 25-A</p><p class="st" id="cst">Starting up</p><p id="csub">Loading channels</p></div></div>
+  <div id="card"><div class="plate"><h1>Luni TV</h1><p class="model">Model: 25-A</p><p class="model" id="ccode2" style="color:var(--acc)"></p><p class="st" id="cst">Starting up</p><p id="csub">Loading channels</p></div></div>
   <div id="spin"></div>
 
   <div id="pause" class="osd"><div><i></i><i></i></div></div>
@@ -183,7 +183,7 @@ mark{background:none;color:var(--acc);font-weight:800}
   <div id="dock" class="osd"></div>
 
   <div id="home" class="layer">
-    <div id="top"><div class="brand"><span class="dots"><i></i><i></i><i></i><i></i></span>Luni TV<span class="mdl">Model: 25-A</span></div><button class="spill" data-a="find" aria-label="Search"></button><span id="hclock"></span><span id="tbtn" style="display:flex;gap:1vh"></span></div>
+    <div id="top"><div class="brand"><span class="dots"><i></i><i></i><i></i><i></i></span>Luni TV<span class="mdl">Model: 25-A</span><span class="mdl" id="ccode" style="margin-left:auto;color:var(--acc);border-color:var(--acc);font-size:2.3vh;letter-spacing:.06em"></span></div><button class="spill" data-a="find" aria-label="Search"></button><span id="hclock"></span><span id="tbtn" style="display:flex;gap:1vh"></span></div>
     <div id="hero"><div id="hnow">Playing now</div><div id="hname">Channels</div><div id="hmeta"></div><div id="hhint"></div></div>
     <div id="rows"></div>
   </div>
@@ -213,6 +213,16 @@ mark{background:none;color:var(--acc);font-weight:800}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.17/hls.min.js"></script>
 <script>LuniLink.host();
+(function(){const sc=()=>{const c=LuniLink.code().toUpperCase();
+  const a=document.getElementById('ccode'),b=document.getElementById('ccode2');
+  if(a)a.textContent='Connect code  '+c; if(b)b.textContent='Connect code  '+c};
+  sc();LuniLink.onChange(sc);})();
+/* TV browsers (Fire TV Silk, Android TV, etc.): the Back button must go back inside Luni TV, not leave it */
+if(/AFT|Silk|Android.*TV|SMART-TV|SmartTV|Tizen|Web0S|BRAVIA|CrKey|HbbTV/i.test(navigator.userAgent)){
+  try{history.pushState({luni:1},'')}catch(e){}
+  addEventListener('popstate',()=>{try{history.pushState({luni:1},'')}catch(e){}
+    document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}))});
+}
 (()=>{
 const $=s=>document.querySelector(s), v=$('#v');
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,x){try{localStorage.setItem(k,x)}catch(e){}}};
@@ -252,7 +262,7 @@ const CONTROLS=[
  ['','LT','Last channel','L'],['','RT','Show channel info','I'],
  ['','Select','Search channels and playlists','/, Ctrl+K'],['','Start','This controls screen','H'],
  ['','Stick','Move in menus','Arrow keys'],['','0-9','Type a channel number','then Enter'],
- ['','F','Add or remove favorite (star)','RT in the guide'],['','Guide top bar','Press up from the first row to reach Search, Settings and Controls','mouse also works'],['','Phone remote','Same buttons plus favorite, sleep timer and picture mode','see connect code below']
+ ['','F','Add or remove favorite (star)','RT in the guide'],['','Guide top bar','Press up from the first row to reach Search, Settings and Controls','mouse also works'],['','TV remote (Fire TV, Android TV)','Arrows and Select to move and pick. Back goes back, Menu opens settings. Play/Pause pauses. Rewind and Fast-forward change channel','no cursor needed'],['','Phone remote','Same buttons plus favorite, sleep timer and picture mode','see connect code below']
 ];
 const BN=['A','B','X','Y','LB','RB','LT','RT','SELECT','START','LS','RS','UP','DOWN','LEFT','RIGHT'];
 $('#hctl').innerHTML=CONTROLS.map(c=>`<span class="k ${c[0]}">${c[1]}</span><span>${c[2]}<br><span class="kb">${c[3]}</span></span>`).join('');
@@ -590,6 +600,16 @@ document.addEventListener('keydown',e=>{
     if(e.key==='F11'){e.preventDefault();pywebview.api.toggle_fullscreen();return}
   }
   if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K')){e.preventDefault();mode==='find'?closeLayer():openFind();return}
+  if(!(e.ctrlKey||e.metaKey||e.altKey)){            /* TV remote buttons (Fire TV, Android TV, Chromecast, smart TVs) */
+    const kn=e.key, kc=e.keyCode;
+    if(kn==='GoBack'||kn==='BrowserBack'||kn==='XF86Back'||kc===4){e.preventDefault();if(mode==='find')closeLayer();else press('B');return}
+    if(kn==='ContextMenu'||kn==='Menu'||kc===82){e.preventDefault();if(mode==='find')closeLayer();else if(mode==='tv')press('Y');else press('B');return}
+    if(mode!=='find'){
+      if(kn==='MediaPlayPause'||kn==='MediaPlay'||kn==='MediaPause'||kc===179||kc===85||kc===126||kc===127){e.preventDefault();if(mode==='tv')togglePlay();else press('A');return}
+      if(kn==='MediaRewind'||kn==='MediaTrackPrevious'||kc===227||kc===89||kc===88){e.preventDefault();if(mode==='tv'){step(-1);osd('#dock',2500)}else press('LB');return}
+      if(kn==='MediaFastForward'||kn==='MediaTrackNext'||kc===228||kc===90||kc===87){e.preventDefault();if(mode==='tv'){step(1);osd('#dock',2500)}else press('RB');return}
+    }
+  }
   if(mode==='find'){
     if(e.ctrlKey||e.metaKey||e.altKey)return;
     if(e.key==='Escape'){e.preventDefault();closeLayer()}
