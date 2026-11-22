@@ -181,6 +181,41 @@ body.radio #rscreen{display:grid}
 #rscreen.paused .eq i{animation-play-state:paused}
 #rnum{color:var(--mute);font-size:2.2vh}
 #rclock{position:absolute;top:4vh;right:3vw;font-size:3vh;font-weight:600;color:var(--mute)}
+/* VR mode: big pointer-friendly on-screen controls */
+body.vr{cursor:default}
+body.vr #dock{display:none}
+body.vr #banner{bottom:33vh}
+body.vr .ib{width:8vh;height:8vh}
+body.vr #rscreen{padding-bottom:26vh}
+body.vr #hero{height:20vh;padding-top:2vh}
+body.vr #hname{font-size:6vh}
+body.vr #rows{padding-bottom:30vh}
+body.vr #sets,body.vr #find,body.vr #help{align-items:start;padding-top:2vh}
+body.vr .sbox{height:64vh}
+body.vr .sr{height:6.6vh}
+body.vr .fbox{height:66vh}
+body.vr .key{height:6vh}
+body.vr .hbox{max-height:64vh}
+#vrp{position:absolute;left:50%;bottom:2vh;translate:-50% 0;z-index:30;display:none;align-items:center;gap:2vh;padding:1.6vh 2vh;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:5vh;max-width:98vw}
+body.vr #vrp{display:flex}
+.vg{display:flex;gap:.9vh}
+.vpad{display:grid;grid-template-columns:repeat(3,7.4vh);grid-template-rows:repeat(3,7.4vh)}
+.vrk{flex-direction:column}
+.vgrid2{display:grid;grid-template-columns:repeat(2,7.4vh);grid-template-rows:repeat(2,7.4vh)}
+.vb{width:7.4vh;height:7.4vh;border:0;border-radius:2.6vh;background:rgba(255,255,255,.1);color:var(--text);font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3vh;cursor:pointer;transition:background .12s,transform .12s;padding:0;touch-action:manipulation}
+.vb svg.i{width:3.6vh;height:3.6vh}
+.vb .t{font-size:1.5vh;font-weight:700;opacity:.85}
+.vb:hover{background:rgba(255,255,255,.26);transform:scale(1.07)}
+.vb:active,.vb.dn{background:var(--acc);color:#0b1b3a;transform:scale(.97)}
+.vb.ok{background:var(--acc);color:#0b1b3a}
+.vb.ok .t{font-size:3vh;opacity:1}
+.vb.ok:hover{background:#ffd3a3}
+body:not(.radio) .vb.ok:hover{background:#c6dbff}
+#vrexp{display:none;width:auto;padding:0 2.4vh;flex-direction:row;gap:1.2vh}
+#vrexp .t{font-size:2vh}
+#vrp.min{padding:1vh 1.4vh}
+#vrp.min .vg{display:none}
+#vrp.min #vrexp{display:flex}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="luni-link.js"></script>
@@ -203,6 +238,7 @@ body.radio #rscreen{display:grid}
     <div id="bclock"></div>
   </div>
   <div id="dock" class="osd"></div>
+  <div id="vrp"></div>
 
   <div id="home" class="layer">
     <div id="top"><div class="brand"><span class="dots"><i></i><i></i><i></i><i></i></span><span id="bt">Luni TV</span><span class="mdl">Model: 25-A</span><span class="mdl" id="ccode" style="margin-left:auto;color:var(--acc);border-color:var(--acc);font-size:2.3vh;letter-spacing:.06em"></span></div><button class="spill" data-a="find" aria-label="Search"></button><span id="hclock"></span><span id="tbtn" style="display:flex;gap:1vh"></span></div>
@@ -262,21 +298,25 @@ const IC={
  help:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.2.9-1.2 1.7M12 17h.01"/>',
  search:'<circle cx="11" cy="11" r="6"/><path d="M16 16l5 5"/>',close:'<path d="M6 6l12 12M18 6L6 18"/>',
  radio:'<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-4"/><circle cx="9" cy="14" r="2.5"/><path d="M15 12.5h3M15 15.5h3"/>',
- tv:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 3l4 3 4-3"/>'
+ tv:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 3l4 3 4-3"/>',
+ up:'<path class="f" d="M12 6l7 11H5z"/>',down:'<path class="f" d="M12 18L5 7h14z"/>',left:'<path class="f" d="M6 12l11-7v14z"/>',right:'<path class="f" d="M18 12L7 19V5z"/>',
+ back:'<path d="M9 7L4 12l5 5M4 12h10a6 6 0 0 1 6 6"/>',star:'<path class="f" d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+ vr:'<path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-3.5l-1.5-2.5h-4L8.5 17H5a2 2 0 0 1-2-2z"/>',mini:'<path d="M6 10l6 6 6-6"/>'
 };
 const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
 const ibtn=(a,n,t,cls='')=>`<button class="ib ${cls}" data-a="${a}" title="${t}" aria-label="${t}">${ic(n)}</button>`;
 $('#dock').innerHTML=ibtn('prev','prev','Previous channel')+ibtn('pp','pausei','Pause','big')+ibtn('next','next','Next channel')+'<span class="sep"></span>'+ibtn('vd','vd','Volume down')+ibtn('vu','vu','Volume up')+ibtn('mute','mute','Mute')+'<span class="sep"></span>'+ibtn('home','home','Channel guide')+ibtn('find','search','Search')+ibtn('radio','radio','Radio')+ibtn('sets','sets','Settings');
-$('#tbtn').innerHTML=ibtn('radio','radio','Radio')+ibtn('sets','sets','Settings')+ibtn('help','help','Controls')+ibtn('close','close','Back to TV');
+$('#tbtn').innerHTML=ibtn('radio','radio','Radio')+ibtn('vr','vr','VR mode')+ibtn('sets','sets','Settings')+ibtn('help','help','Controls')+ibtn('close','close','Back to TV');
 $('.spill').innerHTML=ic('search')+'<span>Search channels, playlists and more</span>';
 
 /* ---------- data ---------- */
 const IPTV='https://iptv-org.github.io/iptv/';
-const DEF={srcUrl:IPTV+'countries/us.m3u',srcName:'US channels',autofs:true,vol:.7,muted:false,vstep:5,fit:'contain',crt:false,h24:false,wrap:true,skip:true,banner:5,resume:true,help:true,cap:false,startHome:true,radioOn:false,rcc:'US'};
+const DEF={srcUrl:IPTV+'countries/us.m3u',srcName:'US channels',autofs:true,vol:.7,muted:false,vstep:5,fit:'contain',crt:false,h24:false,wrap:true,skip:true,banner:5,resume:true,help:true,cap:false,startHome:true,radioOn:false,rcc:'US',vr:false,vrmin:false};
 let S=Object.assign({},DEF);
 try{Object.assign(S,JSON.parse(store.get('lunitv')||'{}'))}catch(e){}
 const save=()=>store.set('lunitv',JSON.stringify(S));
 if(/[?&]radio=1/.test(location.search))S.radioOn=true; else if(/[?&]radio=0/.test(location.search))S.radioOn=false;
+if(/[?&]vr=1/.test(location.search))S.vr=true; else if(/[?&]vr=0/.test(location.search))S.vr=false;
 
 const CONTROLS=[
  ['','D-Pad &#9650;','Volume up','Arrow up, +, wheel up'],['','D-Pad &#9660;','Volume down','Arrow down, -, wheel down'],
@@ -287,7 +327,7 @@ const CONTROLS=[
  ['','LT','Last channel','L'],['','RT','Show channel info','I'],
  ['','Select','Search channels and playlists','/, Ctrl+K'],['','Start','This controls screen','H'],
  ['','Stick','Move in menus','Arrow keys'],['','0-9','Type a channel number','then Enter'],
- ['','F','Add or remove favorite (star)','RT in the guide'],['','Guide top bar','Press up from the first row to reach Search, Settings and Controls','mouse also works'],['','TV remote (Fire TV, Android TV)','Arrows and Select to move and pick. Back goes back, Menu opens settings. Play/Pause pauses. Rewind and Fast-forward change channel','no cursor needed'],['','Phone remote','Same buttons plus favorite, sleep timer and picture mode','see connect code below'],['','R','Switch between TV and radio mode','Radio button in the guide, dock and phone remote'],['','< and >','Previous / next genre or group','Genre buttons on the phone remote in radio mode']
+ ['','F','Add or remove favorite (star)','RT in the guide'],['','Guide top bar','Press up from the first row to reach Search, Settings and Controls','mouse also works'],['','TV remote (Fire TV, Android TV)','Arrows and Select to move and pick. Back goes back, Menu opens settings. Play/Pause pauses. Rewind and Fast-forward change channel','no cursor needed'],['','Phone remote','Same buttons plus favorite, sleep timer and picture mode','see connect code below'],['','V','VR mode: big on-screen controls','VR button in the guide top bar, or Settings'],['','R','Switch between TV and radio mode','Radio button in the guide, dock and phone remote'],['','< and >','Previous / next genre or group','Genre buttons on the phone remote in radio mode']
 ];
 const BN=['A','B','X','Y','LB','RB','LT','RT','SELECT','START','LS','RS','UP','DOWN','LEFT','RIGHT'];
 $('#hctl').innerHTML=CONTROLS.map(c=>`<span class="k ${c[0]}">${c[1]}</span><span>${c[2]}<br><span class="kb">${c[3]}</span></span>`).join('');
@@ -387,7 +427,8 @@ function dead(msg){
   else setCard('No signal',(c?c.name+': ':'')+msg);
 }
 const ppBtn=()=>document.querySelector('#dock [data-a=pp]');
-const setPP=p=>{const b=ppBtn();if(b){b.innerHTML=ic(p?'play':'pausei');b.title=p?'Play':'Pause'}};
+const setPP=p=>{const b=ppBtn();if(b){b.innerHTML=ic(p?'play':'pausei');b.title=p?'Play':'Pause'}
+  const b2=document.querySelector('#vrp [data-a=pp]');if(b2)b2.innerHTML=ic(p?'play':'pausei')+'<span class="t">'+(p?'Play':'Pause')+'</span>'};
 v.addEventListener('playing',()=>{clearTimeout(stallT);tries=0;needStart=false;$('#spin').classList.remove('on');$('#card').classList.add('off');$('#pause').classList.remove('on');setPP(false)});
 v.addEventListener('pause',()=>{if(!v.ended&&cur>=0){$('#pause').classList.add('on');setPP(true)}});
 v.addEventListener('play',()=>{$('#pause').classList.remove('on');setPP(false)});
@@ -418,7 +459,7 @@ function volOsd(show=true){
 function setMute(m){v.muted=m;S.muted=m;save();$('#mutebadge').innerHTML=ic('mute')+'Muted';$('#mutebadge').classList.toggle('on',m);volOsd()}
 const togglePlay=()=>{if(cur<0)return;v.paused?v.play().catch(()=>{}):v.pause()};
 function applyS(){
-  v.style.objectFit=S.fit; v.volume=S.vol; v.muted=S.muted; document.body.classList.toggle('crt',S.crt);
+  v.style.objectFit=S.fit; v.volume=S.vol; v.muted=S.muted; document.body.classList.toggle('crt',S.crt); document.body.classList.toggle('vr',!!S.vr); $('#vrp').classList.toggle('min',!!S.vrmin);
   $('#mutebadge').innerHTML=ic('mute')+'Muted'; $('#mutebadge').classList.toggle('on',S.muted);
 }
 
@@ -535,6 +576,7 @@ const cyc=(arr,val,d)=>arr[(arr.indexOf(val)+d+arr.length)%arr.length];
 const ITEMS=[
  {l:'Radio mode',get:()=>RD.on,act:()=>setRadio(!RD.on)},
  {l:'Radio country',get:()=>S.rcc||'Worldwide',step(d){S.rcc=cyc(CCS,S.rcc||'',d);clearTimeout(RD.rt);RD.rt=setTimeout(reloadRadio,1200)}},
+ {l:'VR mode (big on-screen controls)',get:()=>S.vr,bool:'vr'},
  {l:'Playlist',get:()=>RD.on?'Online radio':S.srcName,act:()=>RD.on?openFind(''):openFind('m3u ')},
  {l:'Search channels and playlists',get:()=>'A to search',act:()=>openFind('')},
  {l:'Add capture card / camera',get:()=>'A to scan',act:()=>addInputs()},
@@ -559,7 +601,7 @@ const ITEMS=[
  {l:'Reset all settings',get:()=>'A to reset',act(){S=Object.assign({},DEF);save();applyS();renderSets();toast('Settings reset.')}}
 ];
 function renderSets(){
-  const R=8, start=Math.max(0,Math.min(sSel-Math.floor(R/2),ITEMS.length-R));
+  const R=document.body.classList.contains('vr')?6:8, start=Math.max(0,Math.min(sSel-Math.floor(R/2),ITEMS.length-R));
   $('#slist').innerHTML=ITEMS.slice(start,start+R).map((it,k)=>{
     const i=start+k, val=it.get(), isB=typeof val==='boolean';
     const right=isB?`<span class="tgl${val?' on':''}"></span>`:(it.step?`<span class="arr" data-d="-1">&#8249;</span>${esc(val)}<span class="arr" data-d="1">&#8250;</span>`:esc(val));
@@ -619,13 +661,14 @@ function press(b){
   }
   if(b==='FAV'){if(mode==='tv'||mode==='home')favKey();return}
   if(b==='RADIO'){setRadio(!RD.on);return}
+  if(b==='VR'){ACTIONS.vr();return}
   if(b==='GPREV'||b==='GNEXT'){if(mode==='tv'||mode==='home')groupJump(b==='GNEXT'?1:-1);return}
   if(b==='X'){setMute(!v.muted);return}
   if(mode==='tv')tvKey(b);else if(mode==='home')homeKey(b);else setKey(b);
 }
 
 /* ---------- keyboard ---------- */
-const KEYS={ArrowUp:'UP',ArrowDown:'DOWN',ArrowLeft:'LEFT',ArrowRight:'RIGHT',' ':'A',Enter:'A',Escape:'B',Backspace:'B',g:'B',G:'B',m:'X',M:'X',s:'Y',S:'Y',Tab:'Y','[':'LB',']':'RB',l:'LT',L:'LT',i:'RT',I:'RT',h:'START',H:'START','?':'START','/':'SELECT',f:'FAV',F:'FAV',r:'RADIO',R:'RADIO',',':'GPREV','.':'GNEXT'};
+const KEYS={ArrowUp:'UP',ArrowDown:'DOWN',ArrowLeft:'LEFT',ArrowRight:'RIGHT',' ':'A',Enter:'A',Escape:'B',Backspace:'B',g:'B',G:'B',m:'X',M:'X',s:'Y',S:'Y',Tab:'Y','[':'LB',']':'RB',l:'LT',L:'LT',i:'RT',I:'RT',h:'START',H:'START','?':'START','/':'SELECT',f:'FAV',F:'FAV',r:'RADIO',R:'RADIO',v:'VR',V:'VR',',':'GPREV','.':'GNEXT'};
 document.addEventListener('keydown',e=>{
   if(window.pywebview&&pywebview.api){
     if((e.ctrlKey||e.metaKey)&&(e.key==='q'||e.key==='Q')){e.preventDefault();pywebview.api.quit();return}
@@ -671,7 +714,7 @@ function commitDigits(){
 }
 
 /* ---------- mouse ---------- */
-const ACTIONS={prev:()=>step(-1),next:()=>step(1),pp:togglePlay,vd:()=>setVol(-S.vstep),vu:()=>setVol(+S.vstep),mute:()=>setMute(!v.muted),home:()=>setMode('home'),find:()=>openFind(),sets:()=>setMode('settings'),close:()=>closeLayer(),help:()=>setMode('help'),radio:()=>setRadio(!RD.on)};
+const ACTIONS={prev:()=>step(-1),next:()=>step(1),pp:togglePlay,vd:()=>setVol(-S.vstep),vu:()=>setVol(+S.vstep),mute:()=>setMute(!v.muted),home:()=>setMode('home'),find:()=>openFind(),sets:()=>setMode('settings'),close:()=>closeLayer(),help:()=>setMode('help'),radio:()=>setRadio(!RD.on),vr:()=>{S.vr=!S.vr;save();applyS();toast(S.vr?'VR mode on: big on-screen controls':'VR mode off',2500)}};
 for(const id of ['#dock','#top'])$(id).addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;ACTIONS[b.dataset.a]();if(mode==='tv')osd('#dock',3500)});
 document.addEventListener('mousemove',()=>{
   document.body.classList.add('mouse'); clearTimeout(timers.m); timers.m=setTimeout(()=>document.body.classList.remove('mouse'),3000);
@@ -1044,7 +1087,8 @@ function radioUI(){
   const on=RD.on; document.body.classList.toggle('radio',on);
   $('#bt').textContent=on?'Luni Radio':'Luni TV'; $('#cbrand').textContent=on?'Luni Radio':'Luni TV';
   document.title=on?'Luni Radio - Model: 25-A':'Luni TV - Model: 25-A';
-  document.querySelectorAll('[data-a=radio]').forEach(b=>{b.innerHTML=ic(on?'tv':'radio');b.title=on?'Switch to TV':'Switch to radio';b.setAttribute('aria-label',b.title)});
+  document.querySelectorAll('.vb[data-a=radio]').forEach(b=>{b.innerHTML=ic(on?'tv':'radio')+'<span class="t">'+(on?'TV':'Radio')+'</span>'});
+  document.querySelectorAll('.ib[data-a=radio]').forEach(b=>{b.innerHTML=ic(on?'tv':'radio');b.title=on?'Switch to TV':'Switch to radio';b.setAttribute('aria-label',b.title)});
   [['prev','Previous '],['next','Next ']].forEach(x=>document.querySelectorAll('[data-a='+x[0]+']').forEach(b=>b.title=x[1]+(on?'station':'channel')));
   $('.spill span').textContent=on?'Search stations, genres and more':'Search channels, playlists and more';
   if(!on)$('#rscreen').classList.remove('paused');
@@ -1090,6 +1134,38 @@ function randomStation(){if(all.length)play(Math.floor(Math.random()*all.length)
 (function(){let h='';for(let k=0;k<30;k++)h+='<i style="animation-duration:'+(.55+((k*37)%60)/100).toFixed(2)+'s;animation-delay:-'+(((k*53)%100)/100).toFixed(2)+'s"></i>';$('#eq').innerHTML=h})();
 ['pause','waiting'].forEach(ev=>v.addEventListener(ev,()=>$('#rscreen').classList.add('paused')));
 v.addEventListener('playing',()=>$('#rscreen').classList.remove('paused'));
+
+/* ---------- VR mode ---------- */
+(function(){
+  const vb=(k,val,icon,label,cls,rep)=>'<button class="vb'+(cls?' '+cls:'')+'" data-'+k+'="'+val+'"'+(rep?' data-rep':'')+' aria-label="'+label+'">'+(icon?ic(icon):'')+'<span class="t">'+label+'</span></button>';
+  const vp=$('#vrp');
+  vp.innerHTML=
+   '<div class="vg vpad">'+vb('b','B','back','Back')+vb('b','UP','up','Up','',1)+vb('a','home','home','Home')
+     +vb('b','LEFT','left','Left','',1)+vb('b','A','','OK','ok')+vb('b','RIGHT','right','Right','',1)
+     +vb('a','find','search','Search')+vb('b','DOWN','down','Down','',1)+vb('a','sets','sets','Settings')+'</div>'
+   +'<div class="vg vrk">'+vb('a','vu','vu','Vol +','',1)+vb('a','mute','mute','Mute')+vb('a','vd','vd','Vol -','',1)+'</div>'
+   +'<div class="vg vrk">'+vb('a','next','next','Next')+vb('a','pp','pausei','Pause')+vb('a','prev','prev','Prev')+'</div>'
+   +'<div class="vg vgrid2">'+vb('a','radio','radio','Radio')+vb('a','fav','star','Favorite')+vb('a','help','help','Controls')
+     +'<button class="vb" id="vrhide" aria-label="Hide controls">'+ic('mini')+'<span class="t">Hide</span></button></div>'
+   +'<button class="vb" id="vrexp" aria-label="Show VR controls">'+ic('vr')+'<span class="t">VR controls</span></button>';
+  let ht=0,hi=0;
+  const stop=()=>{clearTimeout(ht);clearInterval(hi);vp.querySelectorAll('.dn').forEach(x=>x.classList.remove('dn'))};
+  function fire(b,rep){
+    const d=b.dataset;
+    if(d.b){if(rep&&!repeats(d.b))return;press(d.b);return}
+    const a=d.a; if(!a)return;
+    ensureFs(); if(needStart){needStart=false;tryPlay()}
+    if(mode==='help'&&!/^(vu|vd|mute|fav|radio)$/.test(a)){closeLayer();return}
+    const f=RA[a]; if(f)f();
+  }
+  vp.querySelectorAll('.vb[data-a],.vb[data-b]').forEach(b=>{
+    b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('dn');fire(b,false);
+      if(b.hasAttribute('data-rep'))ht=setTimeout(()=>{hi=setInterval(()=>fire(b,true),110)},380)});
+    ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop));
+  });
+  $('#vrhide').addEventListener('click',()=>{S.vrmin=true;save();applyS()});
+  $('#vrexp').addEventListener('click',()=>{S.vrmin=false;save();applyS()});
+})();
 
 /* ---------- boot ---------- */
 setInterval(()=>{const t=clockStr();$('#hclock').textContent=t;const rc=$('#rclock');if(rc)rc.textContent=t;if($('#banner').classList.contains('on'))$('#bclock').textContent=t},20000);
