@@ -56,6 +56,12 @@ button:active .l,button.dn .l{color:var(--on)}
 .txt input{flex:1;height:54px;border-radius:27px;border:1px solid var(--surf2);background:var(--surf);color:var(--text);font:inherit;font-size:17px;padding:0 20px;outline:none;user-select:text;-webkit-user-select:text}
 .txt input:focus{border-color:var(--acc)}
 .txt button{width:84px;height:54px;border-radius:27px;background:var(--acc);color:var(--on);font-weight:700;font-size:16px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surf);border-radius:30px;padding:5px}
+.seg button{height:48px;border-radius:25px;flex-direction:row;gap:8px;background:transparent}
+.seg button .i{font-size:18px}.seg button .l{font-size:14px;color:var(--text)}
+.seg button.act{background:var(--acc);color:var(--on)}.seg button.act .l{color:var(--on)}
+.top.g2{grid-template-columns:1fr 1fr}
+body.radio{--acc:#ffb86b;--on:#3a1d00}
 #msg{text-align:center;color:var(--mute);font-size:13px;min-height:18px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -68,24 +74,30 @@ button:active .l,button.dn .l{color:var(--on)}
 
 <div class="now" id="now"><div class="r1"><span class="num" id="nn">--</span><span class="nm" id="nname">Waiting for TV</span></div>
   <div class="r2"><span id="ngrp">&nbsp;</span><span id="nst"></span></div><div class="bar"><i id="nvol"></i></div></div>
+<div class="seg"><button data-a="tvmode" id="mtv" class="act"><span class="i">&#128250;</span><span class="l">TV</span></button><button data-a="radiomode" id="mrd"><span class="i">&#128251;</span><span class="l">Radio</span></button></div>
 
 <div class="top">
   <button data-a="find"><span class="i">&#128269;</span><span class="l">Search</span></button>
-  <button data-a="home"><span class="i">&#8962;</span><span class="l">Home</span></button>
+  <button data-a="home"><span class="i">&#8962;</span><span class="l" data-tx="Home|Stations">Home</span></button>
   <button data-a="info"><span class="i">&#9432;</span><span class="l">Info</span></button>
   <button data-b="Y"><span class="i">&#9881;</span><span class="l">Settings</span></button>
 </div>
 <div class="top">
   <button data-a="fav" id="bfav"><span class="i">&#9733;</span><span class="l" id="lfav">Favorite</span></button>
   <button data-a="sleep" id="bsleep"><span class="i">&#9790;</span><span class="l" id="lsleep">Sleep</span></button>
-  <button data-a="pic"><span class="i">&#9635;</span><span class="l" id="lpic">Picture</span></button>
+  <button data-a="pic" id="bpic"><span class="i">&#9635;</span><span class="l" id="lpic">Picture</span></button>
+  <button data-a="rand" id="brand" style="display:none"><span class="i">&#128256;</span><span class="l">Shuffle</span></button>
   <button data-a="help"><span class="i">&#63;</span><span class="l">Controls</span></button>
+</div>
+<div class="top g2" id="rgen" style="display:none">
+  <button data-a="gprev"><span class="i">&#9664;</span><span class="l">Prev genre</span></button>
+  <button data-a="gnext"><span class="i">&#9654;</span><span class="l">Next genre</span></button>
 </div>
 
 <div class="rock">
   <div class="rk"><button data-a="vu" data-rep>+</button><div class="t">VOL</div><button data-a="vd" data-rep>&minus;</button></div>
   <button class="mute" id="mute" data-a="mute"><span class="i">&#128263;</span><span class="l">Mute</span></button>
-  <div class="rk"><button data-a="next">+</button><div class="t">CH</div><button data-a="prev">&minus;</button></div>
+  <div class="rk"><button data-a="next">+</button><div class="t" data-tx="CH|STN">CH</div><button data-a="prev">&minus;</button></div>
 </div>
 
 <div class="ring">
@@ -102,17 +114,17 @@ button:active .l,button.dn .l{color:var(--on)}
   <button data-a="last"><span class="i">&#8634;</span><span class="l">Last</span></button>
 </div>
 
-<div class="cap">Channel number</div>
+<div class="cap" data-tx="Channel number|Station number">Channel number</div>
 <div class="pad">
   <button data-d="1">1</button><button data-d="2">2</button><button data-d="3">3</button>
   <button data-d="4">4</button><button data-d="5">5</button><button data-d="6">6</button>
   <button data-d="7">7</button><button data-d="8">8</button><button data-d="9">9</button>
-  <button data-b="LB"><span>&minus;5</span><span class="l">channels</span></button>
+  <button data-b="LB"><span>&minus;5</span><span class="l" data-tx="channels|stations">channels</span></button>
   <button data-d="0">0</button>
-  <button data-b="RB"><span>+5</span><span class="l">channels</span></button>
+  <button data-b="RB"><span>+5</span><span class="l" data-tx="channels|stations">channels</span></button>
 </div>
 
-<div class="txt"><input id="t" type="text" placeholder="Type to search channels" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button id="go">Open</button></div>
+<div class="txt"><input id="t" type="text" placeholder="Type to search channels" data-ph="Type to search channels|Type to search stations" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button id="go">Open</button></div>
 <div id="msg">Hold VOL or the arrows to repeat. Typing fills the TV search; Open picks the top result.</div>
 
 <script>LuniLink.client();
@@ -156,11 +168,16 @@ async function poll(){
     const r=await fetch('/state?k='+encodeURIComponent(K),{cache:'no-store'}); if(!r.ok)return;
     const s=await r.json();
     if(!s.online){$('nname').textContent='TV is not responding';$('nn').textContent='--';$('ngrp').innerHTML='&nbsp;';$('nst').textContent='';return}
-    const playing=s.n>0;
+    const rd=!!s.radio, playing=s.n>0;
+    document.body.classList.toggle('radio',rd);
+    document.querySelectorAll('[data-tx]').forEach(e=>{e.textContent=e.dataset.tx.split('|')[rd?1:0]});
+    document.querySelectorAll('[data-ph]').forEach(e=>{e.placeholder=e.dataset.ph.split('|')[rd?1:0]});
+    $('mtv').classList.toggle('act',!rd); $('mrd').classList.toggle('act',rd);
+    $('rgen').style.display=rd?'grid':'none'; $('bpic').style.display=rd?'none':''; $('brand').style.display=rd?'':'none';
     $('nn').textContent=playing?s.n:'--';
-    $('nname').textContent=playing?s.name:(s.mode==='home'?'Home screen':'Luni TV');
-    $('ngrp').textContent=playing?(s.group+'  \u00b7  '+s.n+' of '+s.total):(s.total?s.total+' channels ready':'');
-    $('nst').textContent=(MODES[s.mode]||'')+(playing&&s.mode==='tv'?(s.paused?'  \u00b7  Paused':''):'');
+    $('nname').textContent=playing?s.name:(s.mode==='home'?(rd?'Station guide':'Home screen'):(rd?'Luni Radio':'Luni TV'));
+    $('ngrp').textContent=playing?(s.group+'  \u00b7  '+s.n+' of '+s.total):(s.total?s.total+(rd?' stations ready':' channels ready'):'');
+    $('nst').textContent=(rd&&s.mode==='tv'?'Listening':(MODES[s.mode]||''))+(playing&&s.mode==='tv'?(s.paused?'  \u00b7  Paused':''):'');
     $('nvol').style.width=(s.muted?0:s.vol)+'%'; $('now').classList.toggle('mt',!!s.muted);
     muted=!!s.muted; $('mute').classList.toggle('on',muted);
     $('bfav').classList.toggle('on',!!s.fav); $('lfav').textContent=s.fav?'Favorited':'Favorite';

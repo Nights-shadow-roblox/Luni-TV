@@ -19,7 +19,7 @@ body{min-height:100vh;font-family:var(--font);color:var(--text);
 .mdl{font-size:13px;font-weight:600;color:var(--mute);padding:4px 12px;border:1px solid var(--line);border-radius:14px}
 .dots{display:flex;gap:5px}.dots i{width:10px;height:10px;border-radius:50%}
 .dots i:nth-child(1){background:#4285f4}.dots i:nth-child(2){background:#ea4335}.dots i:nth-child(3){background:#fbbc04}.dots i:nth-child(4){background:#34a853}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 a.card,.panel{background:rgba(27,30,39,.85);border:1px solid var(--line);border-radius:28px;padding:26px;backdrop-filter:blur(14px)}
 a.card{display:flex;flex-direction:column;gap:10px;color:inherit;text-decoration:none;min-height:190px;justify-content:flex-end;transition:transform .15s,background .15s,border-color .15s}
 a.card:hover,a.card:focus{background:var(--surf2);border-color:var(--acc);transform:translateY(-3px);outline:0}
@@ -53,7 +53,8 @@ input:focus{border-color:var(--acc)}
 
   <div class="cards">
     <a class="card" id="watch" href="tv.html"><span class="ic">&#128250;</span><b>Watch Luni TV</b><span>Open the TV full screen on this device. It shows the connect code in Settings.</span></a>
-    <a class="card" id="ctl" href="remote.html"><span class="ic">&#128241;</span><b>Mobile controller</b><span>Use your phone as the remote for a Luni TV that is open on another screen.</span></a>
+    <a class="card" id="radio" href="tv.html?radio=1"><span class="ic">&#128251;</span><b>Listen to Luni Radio</b><span>Switch the player to radio mode: live stations, genres and the same phone remote.</span></a>
+    <a class="card" id="ctl" href="remote.html"><span class="ic">&#128241;</span><b>Mobile controller</b><span>Use your phone as the remote for Luni TV or Luni Radio on another screen. It can switch between both modes.</span></a>
   </div>
 
   <div class="panels">

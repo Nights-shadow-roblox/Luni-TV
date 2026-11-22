@@ -4,10 +4,10 @@
 (function () {
   'use strict';
   var ALPHA = 'abcdefghjkmnpqrstuvwxyz23456789', RE = /^[a-z2-9]{8}$/, LS = 'luniCode';
-  var ACTIONS = new Set(['vu', 'vd', 'mute', 'prev', 'next', 'pp', 'home', 'find', 'sets', 'last', 'info', 'help', 'back', 'ok', 'fav', 'sleep', 'pic']);
+  var ACTIONS = new Set(['vu', 'vd', 'mute', 'prev', 'next', 'pp', 'home', 'find', 'sets', 'last', 'info', 'help', 'back', 'ok', 'fav', 'sleep', 'pic', 'radio', 'radiomode', 'tvmode', 'gnext', 'gprev', 'rand']);
   var DIGITS = new Set('0123456789'.split('').concat(['Enter']));
   var BUTTONS = new Set(['UP', 'DOWN', 'LEFT', 'RIGHT', 'A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'START', 'SELECT']);
-  var KEEP = ['mode', 'n', 'name', 'group', 'total', 'paused', 'vol', 'muted', 'fav', 'sleep', 'pic'];
+  var KEEP = ['mode', 'n', 'name', 'group', 'total', 'paused', 'vol', 'muted', 'fav', 'sleep', 'pic', 'radio'];
   var ID = function (c) { return 'luni-tv-' + c; };
   var code = null, listeners = [];
 
